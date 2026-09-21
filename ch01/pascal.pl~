@@ -1,0 +1,24 @@
+#!/usr/local/bin/pl -q -t main -f
+%%
+%   -*- Mode: Prolog -*-
+%   Name:               pascal.pl
+%
+%   Started:            Mon Sep 24 09:30:01 2012
+%   Modifications:
+%
+%   Purpose:
+%
+%
+%
+%   Calling Sequence:
+%
+%
+%   Inputs:
+%
+%   Outputs:
+%
+%   Example:
+%
+%   Notes:
+%
+%%

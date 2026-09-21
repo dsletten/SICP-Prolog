@@ -1,0 +1,122 @@
+#!/usr/bin/swipl
+%%  I'm trying to write some -*- Mode: Prolog -*- here!
+%   Name:               count_change.pl
+%
+%   Started:            Wed May  6 17:24:06 2026
+%   Modifications:
+%
+%   Purpose:
+%
+%
+%
+%   Calling Sequence:
+%
+%
+%   Inputs:
+%
+%   Outputs:
+%
+%   Example:
+%
+%   Notes:
+%
+%%
+
+:- module(count_change, []).
+
+denomination(penny, 1).
+denomination(nickel, 5).
+denomination(dime, 10).
+denomination(quarter, 25).
+denomination('half-dollar', 50).
+
+default_coins([penny, nickel, dime, quarter, 'half-dollar']).
+
+%%%
+%%%    Infinite loop!
+%%%    
+%% make_change(0, _, 1).
+%% make_change(A, _, 0) :- A < 0.
+%% %make_change(_, [], 0).
+%% make_change(A, [], 0) :- A > 0.
+%% make_change(Amount, Coins, Count) :-
+%%     Coins = [C|Cs],
+%%     denomination(C, D),
+%%     A is Amount - D,
+%%     make_change(Amount, Cs, Count1),
+%%     make_change(A, Coins, Count2),
+%%     Count is Count1 + Count2.
+
+make_change(0, _, 1).
+make_change(A, _, 0) :- A < 0.
+make_change(A, [], 0) :- A > 0.
+make_change(Amount, Coins, Count) :-
+    Amount > 0,
+    Coins = [C|Cs],
+    denomination(C, D),
+    A is Amount - D,
+    make_change(Amount, Cs, Count1),
+    make_change(A, Coins, Count2),
+    Count is Count1 + Count2.
+
+make_change_1(0, _, 1) :- !.
+make_change_1(A, _, 0) :- A < 0, !.
+make_change_1(_, [], 0) :- !.
+make_change_1(Amount, Coins, Count) :-
+    Coins = [C|Cs],
+    denomination(C, D),
+    A is Amount - D,
+    make_change_1(Amount, Cs, Count1),
+    make_change_1(A, Coins, Count2),
+    Count is Count1 + Count2.
+
+make_change_3(0, _, 1) :- !.
+make_change_3(A, _, 0) :- A < 0, !.
+make_change_3(_, [], 0) :- !.
+make_change_3(Amount, Coins, Count) :-
+    fewer_coins_3(Amount, Coins, Count1),
+    less_money_3(Amount, Coins, Count2),
+    Count is Count1 + Count2.
+
+fewer_coins_3(Amount, [_|Coins], Count) :-
+    make_change_3(Amount, Coins, Count).
+less_money_3(Amount, Coins, Count) :-
+    Coins = [C|_],
+    denomination(C, D),
+    A is Amount - D,
+    make_change_3(A, Coins, Count).
+
+%%%
+%%%    Weird...Prolog is much slower than Lisp but the first version without cuts blows up.
+%%%
+%% count_change:  ?- default_coins(D), make_change(1000, D, C).
+%% ERROR: Stack limit (1.0Gb) exceeded
+%% ERROR:   Stack sizes: local: 0.7Gb, global: 0.2Gb, trail: 40.4Mb
+%% ERROR:   Stack depth: 135, last-call: 1%, Choice points: 2,648,557
+%% ERROR:   Possible non-terminating recursion:
+%% ERROR:     [135] count_change:make_change(93, [length:1], _52971100)
+%% ERROR:     [134] count_change:make_change(93, [length:2], _52971128)
+
+%% count_change:  ?- default_coins(D), make_change_1(1000, D, C).
+%% D = [penny, nickel, dime, quarter, 'half-dollar'],
+%% C = 801451.
+
+%% count_change:  ?- default_coins(D), make_change_3(1000, D, C).
+%% D = [penny, nickel, dime, quarter, 'half-dollar'],
+%% C = 801451.
+
+:- dynamic change/3.
+
+make_change_memoized(0, _, 1) :- !.
+make_change_memoized(A, _, 0) :- A < 0, !.
+make_change_memoized(_, [], 0) :- !.
+make_change_memoized(Amount, Coins, Count) :-
+    change(Amount, Coins, Count), !.
+make_change_memoized(Amount, Coins, Count) :-
+    Coins = [C|Cs],
+    denomination(C, D),
+    A is Amount - D,
+    make_change_memoized(Amount, Cs, Count1),
+    make_change_memoized(A, Coins, Count2),
+    Count is Count1 + Count2,
+    assertz(change(Amount, Coins, Count)).

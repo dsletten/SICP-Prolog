@@ -1,0 +1,25 @@
+#!/usr/bin/swipl
+%%  I'm trying to write some -*- Mode: Prolog -*- here!
+%   Name:               interval.pl
+%
+%   Started:            Fri Aug  7 13:11:43 2026
+%   Modifications:
+%
+%   Purpose:
+%
+%
+%
+%   Calling Sequence:
+%
+%
+%   Inputs:
+%
+%   Outputs:
+%
+%   Example:
+%
+%   Notes:
+%
+%%
+
+:- module(interval, []).
